@@ -5,11 +5,11 @@ services:
     ports:
       - 32711:5432 # 32704 внешний порт для подключения к бд
     volumes:
-      - /var/lib/telegram_bot:/var/lib/postgresql/data
+      - /var/lib/teacher_db:/var/lib/postgresql/data
     environment:
       - POSTGRES_USER=root
       - POSTGRES_PASSWORD=root
-      - POSTGRES_DB=bot_data
+      - POSTGRES_DB=teacher_db
     networks:
       - teacher_bot
   teacher_bot:
