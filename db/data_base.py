@@ -36,3 +36,14 @@ lesson_info = Table(
     Column('created_at', DateTime, default=datetime.datetime.utcnow()),
     Column('is_activ', Boolean),
 )
+
+
+message_index = Table(
+    'message_index',
+    metadata,
+    Column('id', Integer, primary_key=True, autoincrement=True, unique= True),
+    Column('index', String),
+    Column('ids_message', String),
+    Column('tg_chat_id', String),
+    Column('created_at', DateTime, default=datetime.datetime.utcnow()),
+)

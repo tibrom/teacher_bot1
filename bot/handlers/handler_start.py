@@ -25,7 +25,7 @@ from db.base import database
 
 
 async def user_control(message: types.Message):
-    print(message.photo)
+    print(message)
     kb = [
         [types.KeyboardButton(text="Создать ноывй урок")],
         [types.KeyboardButton(text="Посмотреть уроки")]
@@ -38,8 +38,7 @@ async def user_control(message: types.Message):
     )
 
 
-async def create_lesson_1(message: types.Message):
-    pass
+
 
 
  

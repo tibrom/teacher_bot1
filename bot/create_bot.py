@@ -13,5 +13,7 @@ dp = Dispatcher(storage=MemoryStorage())
 
 
 from .handlers.handler_start import register_handler
+from .handlers.handler_new_lesson import register_handler_lesson
 
+register_handler_lesson(dp)
 register_handler(dp)

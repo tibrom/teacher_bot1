@@ -1,6 +1,6 @@
 version: '3'
 services:
-  bot_db:
+  teacher_db:
     image: postgres:15
     ports:
       - 32711:5432 # 32704 внешний порт для подключения к бд
@@ -11,7 +11,19 @@ services:
       - POSTGRES_PASSWORD=root
       - POSTGRES_DB=bot_data
     networks:
-      - botnetwork7
+      - teacher_bot
+  teacher_bot:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: teacher_bot
+    restart: always
+    environment:
+      - LOGIN=administrator #токен телеграм бота, можно передать через перемменную окружения
+      - PASSWORD=3jf95hjy503ffj
+      #- PREFIX="" /route-message
+    networks:
+      - teacher_bot
 networks:
-  botnetwork7:
+  teacher_bot:
     driver: bridge

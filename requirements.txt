@@ -1,0 +1,11 @@
+async-timeout==4.0.3
+aiogram
+asyncpg==0.29.0
+databases==0.8.0
+greenlet==3.0.1
+psycopg2==2.9.9
+pyaes==1.6.1
+Pyrogram==2.0.106
+PySocks==1.7.1
+SQLAlchemy==1.4.50
+TgCrypto==1.2.5
