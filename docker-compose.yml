@@ -21,7 +21,7 @@ services:
     environment:
       - LOGIN=administrator #токен телеграм бота, можно передать через перемменную окружения
       - PASSWORD=3jf95hjy503ffj
-      #- PREFIX="" /route-message
+      - PREFIX="" /route-message
     networks:
       - teacher_bot
 networks:

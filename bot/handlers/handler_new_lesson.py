@@ -134,7 +134,10 @@ class InleneKeyboardControl:
             for id in message_ids:
                 if 'k-' in id:
                     message_id = id.split('-')[-1]
-                    await bot.edit_message_reply_markup(chat_id=self.chat_id,  message_id=int(message_id))
+                    try:
+                        await bot.edit_message_reply_markup(chat_id=self.chat_id,  message_id=int(message_id))
+                    except:
+                        pass
                 query = message_index.delete().where(
                     message_index.c.id == data.id,
                 )
@@ -142,16 +145,28 @@ class InleneKeyboardControl:
         self.messages_id = ''
 
 
+def check_description(text):
+    if text is not None and len(text) < 1000:
+        return True
+    return False
 
 
 async def parse_lesson(caht_id, audio_id, photo: list, description, keyboard = None,)  -> InleneKeyboardControl:
     result = InleneKeyboardControl(keyb=keyboard)
-    if len(photo) == 1 and audio_id is None and len(description) < 1000:
+    
+    if len(photo) == 1 and audio_id is None and check_description(description):
         ids = await bot.send_photo(chat_id=caht_id, photo=photo[0], caption=description, reply_markup=keyboard)
-        result.idk_message = ids.message_id
-    elif audio_id is not None and photo == [] and len(description) < 1000:
+        if keyboard is not None:
+            result.idk_message = ids.message_id
+        else:
+            result.ids_message = ids.message_id
+    elif audio_id is not None and photo == [] and check_description(description):
         ids = await bot.send_audio(chat_id=caht_id, audio=audio_id, caption=description, reply_markup=keyboard)
-        result.idk_message = ids.message_id
+        if keyboard is not None:
+            
+            result.idk_message = ids.message_id
+        else:
+            result.ids_message = ids.message_id
     else:
         for photo_id in photo:
             ids = await bot.send_photo(chat_id=caht_id, photo=photo_id)
@@ -211,6 +226,8 @@ async def write_lesson_info(lesson_info_data):
 
 
 async def create_lesson_1(message: types.Message,  state: FSMContext):
+    key_data = InleneKeyboardControl(info=message,)
+    await key_data.delete_all_inline_keyboard()
     await message.answer(text="Введите название урока", reply_markup=types.ReplyKeyboardRemove())
     await state.set_state(LessonState.lesson_name)
 
@@ -220,7 +237,7 @@ async def create_lesson_2(message: types.Message,  state: FSMContext):
         [types.KeyboardButton(text="Завершить редактирование урока")],
     ]
     keyboard = types.ReplyKeyboardMarkup(keyboard=kb, resize_keyboard=True)
-    text="Отправьте содержание урока. Вы можете использовать текст и медиа, такие как видео, аудио или фото. Описание к медиа отправлять не надо весть текс отправляйте текстовым собщением"
+    text="Отправьте содержание урока. Вы можете использовать текст и медиа, такие как видео, аудио или фото. В ответ бот будет высылать вам как выглядит ваш урок  сейчас для замершение редактирования отправьте 'Завершить редактирование урока'"
     await message.answer(text=text, reply_markup=keyboard)
     await state.set_state(LessonState.lesson_message)
 
@@ -270,6 +287,7 @@ async def show_my_lesson(message: types.Message,):
     index = str(time.time())
     keyb_data = InleneKeyboardControl(info=message, index=index)
     
+    
     query = lesson.select().where(
         lesson.c.is_activ == True
     )
@@ -301,7 +319,7 @@ async def show_my_lesson(message: types.Message,):
             text=f'Урок: {dt.name}',
             reply_markup=keyboard
         )
-        result.ids_message = ids2.message_id
+        result.idk_message = ids2.message_id
         keyb_data.summ_ids_message(result)
 
     await keyb_data.set_ids_message()
@@ -404,7 +422,8 @@ async def create_lesson_info(message: types.Message,  state: FSMContext):
 
 async def show_lesson_info(callback: types.CallbackQuery):
     index = str(time.time())
-    inline = InleneKeyboardControl(info=callback, index=index)
+    inline = InleneKeyboardControl(info=callback)
+    inline.index=index
     await inline.delete_all_message()
     
     query = lesson_info.select().where(
@@ -433,10 +452,11 @@ async def show_lesson_info(callback: types.CallbackQuery):
         )
         inline.summ_ids_message(ikc)
         inline.idk_message = id2.message_id
-        await inline.set_ids_message()
+    await inline.set_ids_message()
 
 
 async def info_change(callback: types.CallbackQuery,  state: FSMContext):
+    
     print(callback.data)
     inline = InleneKeyboardControl(info=callback)
     print("++++++++++",inline.chat_id)
@@ -466,7 +486,7 @@ async def info_change(callback: types.CallbackQuery,  state: FSMContext):
 
 def register_handler_lesson(dp: Dispatcher):
     dp.message.register(create_lesson_1,  F.text == "Создать ноывй урок")
-    dp.message.register(show_my_lesson,  F.text == "Посмотреть уроки")
+    dp.message.register(show_my_lesson,  F.text == "Редактировать уроки")
     dp.message.register(create_lesson_2, LessonState.lesson_name)
     dp.message.register(create_lesson_3, LessonState.lesson_message)
     dp.message.register(create_lesson_info_name, LessonInfoState.key_name)
